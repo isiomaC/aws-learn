@@ -35,8 +35,10 @@ exports.handler  = async(event, context) => {
         'Content-Type': 'application/json',
     };
     
+    const tableName = queryStringParameters?.TableName ?? "my-table"
+    
     let params = {
-        TableName: queryStringParameters.TableName,
+        TableName: tableName,
         Item: {
             ...requestBody
         }
@@ -50,7 +52,7 @@ exports.handler  = async(event, context) => {
                 body = await dynamodb.delete(params).promise();
                 break;
             case 'GET':
-                body = await dynamodb.scan({TableName: queryStringParameters.TableName}).promise();
+                body = await dynamodb.scan({TableName: tableName}).promise();
                 break;
             case 'POST':
                 body = await dynamodb.put(params).promise();
@@ -66,7 +68,8 @@ exports.handler  = async(event, context) => {
                 body = await dynamodb.update(params).promise();
                 break;
             default:
-                throw new Error(`Unsupported method "${httpMethod}"`);
+                body = await dynamodb.scan({TableName: tableName}).promise();
+                break;
         }
     }catch(err){
          statusCode = '400';
